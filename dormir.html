@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>NAPP</title>
+    <link rel="stylesheet" type="text/css" href="estilos.css">
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no">
+</head>
+<body class="bg1">
+        <div class="encabezado">
+            NAPP
+        </div>
+
+        <div class="tabs">
+            <button id="pes1" class="tab activo" onclick="irA('dormir')">Dormir</button>
+            <button id="pes2" class="tab" onclick="irA('siesta')">Siesta</button>
+        </div>
+        
+         <div class="contenido">
+             <button onclick="btnSwitch('dormir')" id="dormir" class="switch izq switch-activo">Dormir</button>
+             <button onclick="btnSwitch('despertar')" id="despertar" class="switch der">Despertar</button>
+             <input type="time" placeholder="00:00" class="tiempo" id="horaDespertador" onchange="calcularDormir()">
+             <p id="textoHora"></p>
+             <button class="boton">Colocar alarma</button>
+         </div> 
+         
+         <div class="contenido2">
+             <input type="number" class="tiempo" id ="tiempoSiesta">
+             <p class="tiempo-restante"></p>
+             <button class="boton" onclick="comenzarSiesta()">Comenzar</button>
+         </div>
+         
+         <audio id="alarma">
+             <source src="alarma.mp3" type="audio/mp3">
+         </audio>
+</body>
+
+<script> 
+        
+    var tipoActual = 'dormir';
+    
+    function calcularDormir(){
+        //Calcular el tiempo para despertar
+        h = document.getElementById('horaDespertador').value;
+        console.log(h);
+        //Jóvenes adultos (7hrs)
+        hora = h.split(':');
+        if(parseInt(hora[0])){
+            if(parseInt(hora[0]) <= 17){
+                hora[0] = parseInt(hora[0]) + 7;
+            }
+            else{
+                hora[0] = parseInt(hora[0]) - 17;
+            }
+            tiempo = "AM";
+        
+            if(parseInt(hora[0]) >= 12){
+                tiempo = "PM";
+                if(parseInt(hora[0]) == 12){
+                }
+                else{
+                    hora[0] = hora[0] - 12;
+                }
+            }
+            else{
+                tiempo = "AM";
+            }
+            document.getElementById('textoHora').innerHTML = "Despertar a las: " + hora[0] + ":" + hora[1] + " " + tiempo;  
+        }else{
+            document.getElementById('textoHora').innerHTML = "";
+        }
+         
+    }
+    
+    function calcularDespertar(){
+        //Calcular el tiempo para despertar
+        h = document.getElementById('horaDespertador').value;
+        console.log(h);
+        //Jóvenes adultos (7hrs)
+        hora = h.split(':');
+        
+        if(parseInt(hora) >= 7){
+            hora[0] = parseInt(hora[0]) - 7;
+        }
+        else{
+            hora[0] = parseInt(hora[0]) + 17;
+        }
+        tiempo = "AM";
+        
+        if(parseInt(hora[0]) >= 12){
+            tiempo = "PM";
+            if(parseInt(hora[0]) == 12){
+            }
+            else{
+                hora[0] = hora[0] - 12;
+            }
+        }
+        else{
+            tiempo = "AM";
+        }
+        
+        document.getElementById('textoHora').innerHTML = "Dormir a las: " + hora[0] + ":" + hora[1] + " " + tiempo;
+        
+    
+        
+    }
+    
+    function btnSwitch(tipo){
+            document.getElementById(tipoActual).classList.remove('switch-activo');
+            document.getElementById(tipo).classList.add('switch-activo');
+            tipoActual = tipo;
+        
+        if (tipo=="dormir"){
+            document.querySelector('.bg1').classList.remove('bg2');
+            
+            document.getElementById('horaDespertador').setAttribute('onChange', 'calcularDormir()');
+        }
+        else{
+            document.querySelector('.bg1').classList.add('bg2');
+            document.getElementById('horaDespertador').setAttribute('onChange', 'calcularDespertar()');
+        }
+    }
+    
+    function irA(algo){
+        if(algo == 'dormir'){
+            document.querySelector('.contenido').style.transition = ".5s all";
+            document.querySelector('.contenido').style.left = "0px";
+            document.querySelector('.contenido2').style.left = "100%";
+            document.getElementById('pes1').classList.add('activo')
+            document.getElementById('pes2').classList.remove('activo')
+        }
+        else{        
+            document.querySelector('.contenido2').style.transition = ".5s all";
+            document.querySelector('.contenido2').style.left = "0px";
+            document.querySelector('.contenido').style.left = "100%";
+            document.getElementById('pes2').classList.add('activo');
+            document.getElementById('pes1').classList.remove('activo');
+        }
+    }
+    
+    function comenzarSiesta(){
+        var tiempoSiesta = document.getElementById('tiempoSiesta').value;
+        calcularRestante(tiempoSiesta-1);
+    }
+    
+    var segundos = 60;
+    var segundosTranscurridos = 0;
+    
+    function calcularRestante(tiempoSiesta){
+        document.querySelector('.bg1').style.opacity=".1";
+        document.querySelector('.bg1').classList.add("oscuro");
+        
+        if(segundosTranscurridos==0 && (tiempoSiesta+1)==0){
+            document.querySelector('.tiempo-restante').innerHTML = "";
+            document.querySelector('.bg1').style.opacity="1";
+            document.querySelector('.bg1').classList.remove("oscuro");
+            document.getElementById('alarma').play();
+        }else{    
+            segundosTranscurridos++;
+            if(segundosTranscurridos == 60){
+                segundosTranscurridos = 0;
+                tiempoSiesta--;
+            }
+            if(tiempoSiesta>=0){
+                segundosRestantes = segundos-segundosTranscurridos;
+                document.querySelector('.tiempo-restante').innerHTML = "Tiempo transcurrido: " + tiempoSiesta+":"+segundosRestantes;
+            }
+        }
+            setTimeout(function(){calcularRestante(tiempoSiesta)}, 100);
+    }
+    
+</script>
+</html>
